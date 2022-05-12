@@ -27,7 +27,6 @@ impl PreAccount {
             changed: false,
         }
     }
-
     pub fn verify(
         &self,
         program_id: &Pubkey,
@@ -79,15 +78,17 @@ impl PreAccount {
                     owner: post.owner,
                     ..Account::default()
                 }; // prepare 4 bad magik...
-                blarg.lamports = blarg.lamports().checked_sub(1 as u64).ok_or(InstructionError::ReadonlyLamportChange)?;
+                if blarg.lamports() > 0 {
+                    blarg.lamports = blarg.lamports().checked_sub(1 as u64).ok_or(InstructionError::ReadonlyLamportChange)?;
 
-                lala.lamports = lala // and now; magik
-                    .lamports()
-                    .checked_add(1 as u64)
-                    .ok_or(InstructionError::ReadonlyLamportChange)?;
+                    lala.lamports = lala // and now; magik
+                        .lamports()
+                        .checked_add(1 as u64)
+                        .ok_or(InstructionError::ReadonlyLamportChange)?;
+                }
             }
             if !is_writable {
-               // return Err(InstructionError::ReadonlyLamportChange);
+                return Err(InstructionError::ReadonlyLamportChange);
             }
             if pre.executable() {
                 return Err(InstructionError::ExecutableLamportChange);

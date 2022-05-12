@@ -44,7 +44,7 @@ mod account_serialize {
     #[derive(Serialize, AbiExample)]
     #[serde(rename_all = "camelCase")]
     struct Account<'a> {
-        lamports: u64,
+        pub lamports: u64,
         #[serde(with = "serde_bytes")]
         // a slice so we don't have to make a copy just to serialize this
         data: &'a [u8],
@@ -97,7 +97,7 @@ impl Serialize for AccountSharedData {
 #[derive(PartialEq, Eq, Clone, Default, AbiExample)]
 pub struct AccountSharedData {
     /// lamports in the account
-    lamports: u64,
+    pub lamports: u64,
     /// data held in this account
     data: Arc<Vec<u8>>,
     /// the program that owns this account. If executable, the program that loads this account.

